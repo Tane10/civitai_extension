@@ -1,5 +1,17 @@
 import { Civitai, Scheduler } from "civitai";
 
+// TODO: add handler for image in que i.e. check progress or websocket
+
+// TODO: add image display to see results
+
+//TODO: add small alert / notification to icon once image is generate
+
+//TODO: add more logs to give info on whats happening
+
+//TODO: add more input filed to allow better image generation i.e. different checkpoints, models, etc
+
+// TODO: display current buzz and how much is spent on image
+
 let civitai: Civitai | undefined;
 let API_KEY: string | undefined;
 
