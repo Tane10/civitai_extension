@@ -1,12 +1,17 @@
-// A content script is JavaScript that runs directly within the context of a web page
-// chrome.runtime.sendMessage({ ask: "cookies" }, (response) => {
-//   console.log(response.ans); // Receive response from background script
-// });
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("promptForm");
 
-// chrome.runtime.connect()
+  // have to cast to input element
+  const textarea = <HTMLInputElement>document.getElementById("promptField");
 
-let onPage = document.URL == "https://civitai.com/generate";
+  if (form && textarea) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
 
-if (onPage) {
-  document.addEventListener("click", () => {});
-}
+      const prompt = textarea.value;
+      if (prompt) {
+        chrome.runtime.sendMessage({ type: "prompt", value: prompt });
+      }
+    });
+  }
+});

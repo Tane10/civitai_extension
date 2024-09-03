@@ -1,98 +1,83 @@
-/**
- * Background Script Advantages:
-Has access to privileged APIs: chrome.cookies, chrome.storage, chrome.tabs, etc.
-Can run background processes that aren't tied to any specific webpage.
-Handles events like browser actions, alarms, or messages from content scripts
- */
+import { Civitai, Scheduler } from "civitai";
+// import "dotenv/config";
 
-// let cookies;
+let civitai: Civitai | undefined;
 
-// let active = true;
+const input = {
+  model: "urn:air:sdxl:checkpoint:civitai:101055@128078",
+  params: {
+    prompt:
+      "RAW photo, face portrait photo of 26 y.o woman, wearing black dress, happy face, hard shadows, cinematic shot, dramatic lighting",
+    negativePrompt:
+      "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime, mutated hands and fingers:1.4), (deformed, distorted, disfigured:1.3)",
+    scheduler: Scheduler.EULER_A,
+    steps: 20,
+    cfgScale: 7,
+    width: 512,
+    height: 512,
+    clipSkip: 2,
+  },
+};
 
-// let apiKey = "";
-// (async () => {
-//   const cookies = chrome.cookies.getAll({ url: "https://civitai.com/*" });
+const initCivitai = (): void => {
+  // const API_KEY = process.env.API_KEY; -> this don't work and cause background to fail.
+  // maybe use cookies instead
 
-//   for (cookie of cookies) {
-//     if (cookies.name == "__Secure-civitai-token") {
-//       cookies = cookies;
-//       break;
-//     }
-//   }
-// })();
+  if (!API_KEY) {
+    console.error("API_KEY not found in environment variables.");
+    return; // Exit early if no API key is present
+  }
 
-// if (cookies) {
-//   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-//     if (request.ask === "cookies") {
-//       sendResponse({ ans: cookies });
-//     }
-//   });
-// }
+  try {
+    civitai = new Civitai({ auth: API_KEY });
+    console.log("Civitai initialized successfully.");
+  } catch (err) {
+    console.error("Failed to initialize Civitai:", err);
+  }
+};
 
-// async function createAopiKey() {
-//   const addKey = await fetch("https://civitai.com/api/auth/csrf");
+const handleImageJob = async (
+  request: any,
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: any) => void
+): Promise<void> => {
+  if (!civitai) {
+    console.error("Civitai instance is not initialized.");
+    sendResponse({
+      status: "error",
+      message: "Civitai instance is not available.",
+    });
+    return;
+  }
 
-//   console.log(addKey.json());
-// }
+  if (request.type === "prompt") {
+    // Placeholder for handling image generation based on the request
+    // Example: Generate an image or process the request
+    // const image = civitai.someMethod(request.payload);
+    const response = await civitai.image.fromText(input);
+    console.log(response);
 
-// while (active) {
-//   if (!document.URL.includes("https://civitai.com/")) {
-//     active = false;
-//   }
-// }
+    console.log("Processing prompt request:", request.payload);
 
-// 573ef6750e41ab99fba32a8311ddcdfb
+    // Example response (modify according to actual logic)
+    sendResponse({ status: "success", message: "Request processed." });
+  } else {
+    console.warn("Unknown request type:", request.type);
+    sendResponse({ status: "error", message: "Unknown request type." });
+  }
+};
 
-// Preuroser => logged in already
+chrome.runtime.onMessage.addListener(
+  async (
+    request: any,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    await handleImageJob(request, sender, sendResponse);
+  }
+);
 
-// (async () => {
-//   let csrfToken;
-//   const fetchCsrf = await fetch("https://civitai.com/api/auth/csrf");
-
-//   if (fetchCsrf.ok) {
-//     csrfToken = (await addKey.json())["csrfToken"];
-//   }
-
-//   const authViaRedit = await fetch(
-//     "https://civitai.com/api/auth/signin/reddit",
-//     {
-//       method: "POST",
-//       body: { callbackUrl: "/", csrfToken, json: true },
-//       headers: {
-//         "Content-Type": "application/json; charset=utf-8",
-//         Accept: "application/json",
-//       },
-//     }
-//   );
-
-//   // https://civitai.com/api/auth/signin/reddit
-
-//   console.log(await addKey.json());
-// })();
-
-// (async () => {
-//   let csrfToken;
-//   const fetchCsrf = await fetch("https://civitai.com/api/auth/civ-token");
-
-//   console.log(fetchCsrf);
-
-//   if (fetchCsrf.ok) {
-//     console.log(await addKey.json());
-//   }
-
-//   // const authViaRedit = await fetch(
-//   //   "https://civitai.com/api/auth/signin/reddit",
-//   //   {
-//   //     method: "POST",
-//   //     body: { callbackUrl: "/", csrfToken, json: true },
-//   //     headers: {
-//   //       "Content-Type": "application/json; charset=utf-8",
-//   //       Accept: "application/json",
-//   //     },
-//   //   }
-//   // );
-
-//   // // https://civitai.com/api/auth/signin/reddit
-
-//   // console.log(await addKey.json());
-// })();
+chrome.runtime.onInstalled.addListener(() => {
+  initCivitai();
+  console.log("Extension installed");
+});

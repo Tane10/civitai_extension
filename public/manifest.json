@@ -6,15 +6,18 @@
     "default_popup": "index.html",
     "default_icon": "choice.png"
   },
-  "permissions": ["activeTab", "scripting", "cookies", "storage"],
-  "host_permissions": ["https://civitai.com/*"],
+  "permissions": ["activeTab", "storage"],
   "content_scripts": [
     {
-      "matches": ["https://civitai.com/*"],
-      "js": ["content.js"]
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
     }
   ],
   "background": {
     "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "choice.png"
   }
 }

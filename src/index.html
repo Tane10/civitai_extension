@@ -1,15 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="content.js"></script>
-</head>
-<body>
-    <div>
-        <p> this is a test</p>
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+  </head>
+  <body>
+    <div class="Container main">
+      <div class="Container inner">
+        <p>
+          <label for="promptField">Type your prompt here:</label>
+        </p>
+        <form id="promptForm">
+          <textarea
+            id="promptField"
+            name="promptField"
+            rows="5"
+            cols="10"
+            placeholder="Small happy cat"
+          ></textarea>
+          <br />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
     </div>
-    
-</body>
+  </body>
 </html>
