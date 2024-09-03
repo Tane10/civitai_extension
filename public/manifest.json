@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Civitai Multi Select",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "choice.png"
+  },
+  "permissions": ["activeTab", "scripting", "cookies", "storage"],
+  "host_permissions": ["https://civitai.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://civitai.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
