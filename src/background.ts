@@ -12,6 +12,10 @@ import { Civitai, Scheduler } from "civitai";
 
 // TODO: display current buzz and how much is spent on image
 
+//TODO: add token validation
+
+// TODO: look into moving to vue as we are soon walking into more complex things
+
 let civitai: Civitai | undefined;
 let API_KEY: string | undefined;
 
