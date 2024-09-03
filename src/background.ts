@@ -1,7 +1,7 @@
 import { Civitai, Scheduler } from "civitai";
-// import "dotenv/config";
 
 let civitai: Civitai | undefined;
+let API_KEY: string | undefined;
 
 const input = {
   model: "urn:air:sdxl:checkpoint:civitai:101055@128078",
@@ -17,6 +17,18 @@ const input = {
     height: 512,
     clipSkip: 2,
   },
+};
+
+const fetchApiKey = () => {
+  chrome.cookies.get(
+    { url: "https://civitai.com/", name: "api_token" },
+    (cookie) => {
+      if (cookie) {
+        API_KEY = cookie.value;
+      } else {
+      }
+    }
+  );
 };
 
 const initCivitai = (): void => {
@@ -50,21 +62,15 @@ const handleImageJob = async (
     return;
   }
 
-  if (request.type === "prompt") {
-    // Placeholder for handling image generation based on the request
-    // Example: Generate an image or process the request
-    // const image = civitai.someMethod(request.payload);
-    const response = await civitai.image.fromText(input);
-    console.log(response);
+  // Placeholder for handling image generation based on the request
+  // Example: Generate an image or process the request
+  // const image = civitai.someMethod(request.payload);
+  const response = await civitai.image.fromText(input);
+  console.log(response);
+  console.log("Processing prompt request:", request.payload);
 
-    console.log("Processing prompt request:", request.payload);
-
-    // Example response (modify according to actual logic)
-    sendResponse({ status: "success", message: "Request processed." });
-  } else {
-    console.warn("Unknown request type:", request.type);
-    sendResponse({ status: "error", message: "Unknown request type." });
-  }
+  // Example response (modify according to actual logic)
+  sendResponse({ status: "success", message: "Request processed." });
 };
 
 chrome.runtime.onMessage.addListener(
@@ -73,11 +79,41 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response?: any) => void
   ) => {
-    await handleImageJob(request, sender, sendResponse);
+    try {
+      console.log(request);
+      switch (request.action) {
+        case "sendPrompt":
+          await handleImageJob(request, sender, sendResponse);
+          break;
+
+        case "setToken":
+          chrome.cookies.set({
+            url: "https://developer.civitai.com/",
+            name: "api_token",
+            value: request.value,
+            domain: ".civitai.com",
+          });
+          API_KEY = request.value;
+
+          initCivitai();
+
+          sendResponse({ valid: true });
+
+          break;
+
+        default:
+          console.log("Unknown action:", request.action);
+          sendResponse({ error: "Unknown action" });
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    return true;
   }
 );
 
 chrome.runtime.onInstalled.addListener(() => {
-  initCivitai();
   console.log("Extension installed");
 });

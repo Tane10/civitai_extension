@@ -6,7 +6,7 @@
     "default_popup": "index.html",
     "default_icon": "choice.png"
   },
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "cookies", "tabs"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -14,6 +14,7 @@
       "css": ["styles.css"]
     }
   ],
+  "host_permissions": ["*://*.civitai.com/*"],
   "background": {
     "service_worker": "background.js"
   },
