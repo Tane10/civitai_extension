@@ -5,7 +5,7 @@ const build = () => {
   try {
     esbuild
       .build({
-        entryPoints: ["./src/background.ts", "./src/content.ts"],
+        entryPoints: ["src/index.tsx", "src/background.ts", "src/content.ts"],
         bundle: true,
         minify: true,
         sourcemap: true,
@@ -13,6 +13,11 @@ const build = () => {
         platform: "node",
         loader: {
           ".png": "file", // Example loader for images if needed
+        },
+        define: {
+          "process.env.NODE_ENV": JSON.stringify(
+            process.env.NODE_ENV || "development"
+          ),
         },
       })
       .catch(() => process.exit(1));
