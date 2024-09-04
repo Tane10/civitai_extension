@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="content.js"></script>
-    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <link rel="stylesheet" href="styles/tailwind.css" />
   </head>
   <body>
     <div class="Container main">
@@ -20,20 +20,44 @@
       </div>
 
       <div class="Container inner">
-        <p>
-          <label for="promptField">Type your prompt here:</label>
-        </p>
-        <form id="promptForm">
-          <textarea
-            id="promptField"
-            name="promptField"
-            rows="5"
-            cols="10"
-            placeholder="Small happy cat"
-          ></textarea>
-          <br />
-          <button type="submit">Submit</button>
-        </form>
+        <div class="Container prompt">
+          <form id="promptForm">
+            <div class="Container options">
+              <br />
+              <label for="dropdown"> </label>
+              <select id="dropdown" name="dropdown">
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+              </select>
+            </div>
+            <p>
+              <label for="promptField">Prompt*</label>
+            </p>
+            <textarea
+              id="promptField"
+              name="promptField"
+              rows="5"
+              cols="10"
+              placeholder="Your prompt goes here..."
+            ></textarea>
+            <br />
+
+            <p>
+              <label for="negPromptField">Negative Prompt</label>
+            </p>
+            <textarea
+              id="negPromptField"
+              name="negPromptField"
+              rows="5"
+              cols="10"
+              placeholder="Negative Prompt here..."
+            ></textarea>
+            <br />
+
+            <button type="submit">Submit</button>
+          </form>
+        </div>
       </div>
     </div>
   </body>

@@ -133,3 +133,4 @@ dist
 dist.crx
 dist.pem
 .DS_Store
+dump*
