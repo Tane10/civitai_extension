@@ -1,213 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import Form from "./components/Form";
+import Modal from "./components/Modal";
+import Query from "./components/Query";
+import ViewAll from "./components/ViewAll";
 
 const App: React.FC = () => {
-  // States for form values
-  const [model, setModel] = useState<string>('');
-  const [resources, setResources] = useState<string>('');
-  const [prompt, setPrompt] = useState<string>('');
-  const [negativePrompt, setNegativePrompt] = useState<string>('');
-  const [aspectRatio, setAspectRatio] = useState<string>('square');
-  const [nsfw, setNsfw] = useState<boolean>(false);
-  const [draftMode, setDraftMode] = useState<boolean>(false);
-  const [cfgScale, setCfgScale] = useState<string>('creative');
-  const [sampler, setSampler] = useState<string>('');
-  const [steps, setSteps] = useState<number>(0);
-  const [seed, setSeed] = useState<string>('');
-  const [clipSkip, setClipSkip] = useState<number>(0);
+  const [activeComponent, setActiveComponent] = useState<string>("Form");
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Simulate checking for a valid API key
+    const storedApiKey = localStorage.getItem("api_key");
+    if (!storedApiKey) {
+      setIsModalVisible(true);
+    } else {
+      setApiKey(storedApiKey);
+    }
+  }, []);
+
+  const handleSubmitApiKey = (newApiKey: string) => {
+    // Validate the API key
+    if (newApiKey) {
+      localStorage.setItem("api_key", newApiKey);
+      setApiKey(newApiKey);
+      setIsModalVisible(false);
+    }
+  };
+
+  const cardsData = [
+    {
+      imageCount: 4,
+      timeStamp: "2024-09-05T12:00:00Z",
+      jobId: "job123",
+      prompt:
+        "This is a prompt for the card. It might be very long and could potentially be truncated.",
+      img: [
+        { id: "img1", src: "https://via.placeholder.com/150" },
+        { id: "img2", src: "https://via.placeholder.com/150" },
+        { id: "img3", src: "https://via.placeholder.com/150" },
+        { id: "img4", src: "https://via.placeholder.com/150" },
+      ],
+      onShowInfo: () => alert("Show Info"),
+      onFetchData: () => alert("Fetch Data"),
+      onDeletePrompt: () => alert("Delete Prompt"),
+    },
+    {
+      imageCount: 4,
+      timeStamp: "2024-09-05T12:00:00Z",
+      jobId: "job1234",
+      prompt:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ac libero nec justo gravida varius. Integer sollicitudin augue eu augue fermentum, ut tristique sapien iaculis. Curabitur.",
+      img: [
+        { id: "img1", src: "https://via.placeholder.com/150" },
+        { id: "img2", src: "https://via.placeholder.com/150" },
+        { id: "img3", src: "https://via.placeholder.com/150" },
+        { id: "img4", src: "https://via.placeholder.com/150" },
+      ],
+      onShowInfo: () => alert("Show Info"),
+      onFetchData: () => alert("Fetch Data"),
+      onDeletePrompt: () => alert("Delete Prompt"),
+    },
+    // Add more card data as needed
+  ];
+
+  const renderComponent = () => {
+    switch (activeComponent) {
+      case "Form":
+        return <Form />;
+      case "Query":
+        return <Query cards={cardsData} />;
+      case "ViewAll":
+        return <ViewAll images={cardsData.flatMap(({ img }) => img)} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <form className="space-y-4">
-        {/* Model Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Model*</label>
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select a model</option>
-            <option value="model1">Model 1</option>
-            <option value="model2">Model 2</option>
-            {/* Add more options as needed */}
-          </select>
-        </div>
+    <div className="app-container">
+      {/* Header with Toggle Buttons */}
+      <header className="header p-4 flex justify-around flex space-x-2">
+        <button
+          className={`btn ${
+            activeComponent === "Form" ? "bg-blue-500" : "bg-gray-500"
+          } px-4 py-2 border rounded-md  text-white shadow-md `}
+          onClick={() => setActiveComponent("Form")}
+        >
+          Create
+        </button>
+        <button
+          className={`btn ${
+            activeComponent === "Query" ? "bg-blue-500" : "bg-gray-500"
+          } px-4 py-2 border rounded-md text-white shadow-md `}
+          onClick={() => setActiveComponent("Query")}
+        >
+          Query
+        </button>
+        <button
+          className={`btn ${
+            activeComponent === "ViewAll" ? "bg-blue-500" : "bg-gray-500"
+          } px-4 py-2 border rounded-md  text-white shadow-md `}
+          onClick={() => setActiveComponent("ViewAll")}
+        >
+          View all
+        </button>
+      </header>
 
-        {/* Additional Resources Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Additional Resources</label>
-          <select
-            value={resources}
-            onChange={(e) => setResources(e.target.value)}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select a resource</option>
-            <option value="resource1">Resource 1</option>
-            <option value="resource2">Resource 2</option>
-            {/* Add more options as needed */}
-          </select>
-        </div>
+      {/* Body for rendering selected component */}
+      <main className="main-body p-4">{renderComponent()}</main>
 
-        {/* Prompt Text Area */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Prompt*</label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            rows={4}
-          />
-        </div>
+      <Modal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={handleSubmitApiKey}
+      />
+    </div>
+  );
+};
 
-        {/* Negative Prompt Text Area */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Negative Prompt</label>
-          <textarea
-            value={negativePrompt}
-            onChange={(e) => setNegativePrompt(e.target.value)}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            rows={4}
-          />
-        </div>
-
-        {/* Aspect Ratio */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Aspect Ratio</label>
-          <div className="flex space-x-2">
-            {['square', 'landscape', 'portrait'].map((ratio) => (
-              <button
-                key={ratio}
-                type="button"
-                onClick={() => setAspectRatio(ratio)}
-                className={`flex-1 py-2 text-center rounded-md ${aspectRatio === ratio ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-              >
-                {ratio.charAt(0).toUpperCase() + ratio.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* NSFW Toggle */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">NSFW</label>
-          <input
-            type="checkbox"
-            checked={nsfw}
-            onChange={() => setNsfw(!nsfw)}
-            className="form-checkbox h-5 w-5 text-blue-600"
-          />
-        </div>
-
-        {/* Draft Mode Toggle */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Draft Mode</label>
-          <input
-            type="checkbox"
-            checked={draftMode}
-            onChange={() => setDraftMode(!draftMode)}
-            className="form-checkbox h-5 w-5 text-blue-600"
-          />
-        </div>
-
-        {/* Advanced Settings */}
-        <div className="border-t border-gray-300 pt-4">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium text-gray-700">CFG Scale</label>
-            <div className="flex space-x-2">
-              {['creative', 'balance', 'precise'].map((scale) => (
-                <button
-                  key={scale}
-                  type="button"
-                  onClick={() => setCfgScale(scale)}
-                  className={`px-4 py-2 text-center rounded-md ${cfgScale === scale ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  {scale.charAt(0).toUpperCase() + scale.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Slider */}
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700">Slider</label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={clipSkip}
-              onChange={(e) => setClipSkip(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        {/* Sampler Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Sampler</label>
-          <select
-            value={sampler}
-            onChange={(e) => setSampler(e.target.value)}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select a sampler</option>
-            <option value="sampler1">Sampler 1</option>
-            <option value="sampler2">Sampler 2</option>
-            {/* Add more options as needed */}
-          </select>
-        </div>
-
-        {/* Steps Slider */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Steps</label>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={steps}
-            onChange={(e) => setSteps(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Seed Toggle with Input */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Seed</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={!!seed}
-              onChange={() => setSeed(seed ? '' : 'default')}
-              className="form-checkbox h-5 w-5 text-blue-600"
-            />
-            <input
-              type="text"
-              value={seed}
-              onChange={(e) => setSeed(e.target.value)}
-              placeholder="Enter seed"
-              className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        {/* Clip Skip Slider */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Clip Skip</label>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={clipSkip}
-            onChange={(e) => setClipSkip(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            Submit
-          </button>
-       
+export default App;

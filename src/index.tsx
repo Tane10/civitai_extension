@@ -1,6 +1,11 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import Form from "./Form";
-import "../public/styles.css";
+import ReactDOM from 'react-dom/client';
+import App from "./App";
+import "./index.css";
 
-ReactDOM.render(<Form />, document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement); // Get root element
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
