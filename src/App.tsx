@@ -11,21 +11,35 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Simulate checking for a valid API key
-    const storedApiKey = localStorage.getItem("api_key");
-    if (!storedApiKey) {
-      setIsModalVisible(true);
-    } else {
-      setApiKey(storedApiKey);
-    }
+    // const storedApiKey =
+    //   document.cookie
+    //     .split(";")
+    //     .map((item) => item.trim())
+    //     .find((cookie) => cookie.startsWith(`civitai_api_key=`))
+    //     ?.split("=")[1] || null;
+    // if (!storedApiKey) {
+    //   setIsModalVisible(true);
+    // } else {
+    // setApiKey(storedApiKey);
+    // }
   }, []);
 
   const handleSubmitApiKey = (newApiKey: string) => {
     // Validate the API key
     if (newApiKey) {
-      localStorage.setItem("api_key", newApiKey);
       setApiKey(newApiKey);
-      setIsModalVisible(false);
+
+      chrome.runtime.sendMessage(
+        { action: "set_api_key", value: newApiKey },
+        (res) => {
+          if (res.valid) {
+            return;
+          }
+        }
+      );
+      return;
     }
+    setIsModalVisible(false);
   };
 
   const cardsData = [
