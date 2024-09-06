@@ -3,6 +3,9 @@ import Form from "./components/Form";
 import Modal from "./components/Modal";
 import Query from "./components/Query";
 import ViewAll from "./components/ViewAll";
+import { messageHandler } from "./messageHandler";
+import { ClientActions } from "./types";
+import { error } from "console";
 
 const App: React.FC = () => {
   const [activeComponent, setActiveComponent] = useState<string>("Form");
@@ -26,26 +29,20 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleSubmitApiKey = (newApiKey: string) => {
+  const handleSubmitApiKey = async (newApiKey: string) => {
     // Validate the API key
     if (newApiKey) {
       setApiKey(newApiKey);
 
-      chrome.runtime.sendMessage(
-        { action: "set_api_key", value: newApiKey },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-          }
+      const apiKeyMsg = await messageHandler({
+        action: ClientActions.SET_API_KEY,
+        value: newApiKey,
+      });
 
-          if (response.valid) {
-            setApiKey(newApiKey);
-            setIsModalVisible(false);
-          }
-          console.log(response);
-        }
-      );
-
+      if (!apiKeyMsg.error) {
+        setApiKey(newApiKey);
+        setIsModalVisible(false);
+      }
       return;
     }
   };
