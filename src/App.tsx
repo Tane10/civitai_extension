@@ -11,17 +11,19 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Simulate checking for a valid API key
+
     // const storedApiKey =
     //   document.cookie
     //     .split(";")
     //     .map((item) => item.trim())
-    //     .find((cookie) => cookie.startsWith(`civitai_api_key=`))
+    //     .find((cookie) => cookie.startsWith(`api_key=`))
     //     ?.split("=")[1] || null;
-    // if (!storedApiKey) {
-    //   setIsModalVisible(true);
-    // } else {
-    // setApiKey(storedApiKey);
-    // }
+
+    //TODO: Set up a function that when pop up is triggered ask for cookie from background script as this is where we store our cookies
+    if (!apiKey) {
+      setIsModalVisible(true);
+    } else {
+    }
   }, []);
 
   const handleSubmitApiKey = (newApiKey: string) => {
@@ -31,15 +33,21 @@ const App: React.FC = () => {
 
       chrome.runtime.sendMessage(
         { action: "set_api_key", value: newApiKey },
-        (res) => {
-          if (res.valid) {
-            return;
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
           }
+
+          if (response.valid) {
+            setApiKey(newApiKey);
+            setIsModalVisible(false);
+          }
+          console.log(response);
         }
       );
+
       return;
     }
-    setIsModalVisible(false);
   };
 
   const cardsData = [

@@ -64,92 +64,89 @@ const initCivitai = (): void => {
   }
 };
 
-const handleImageJob = async (
-  request: any,
-  sender: chrome.runtime.MessageSender,
-  sendResponse: (response?: any) => void
-): Promise<void> => {
-  if (!civitai) {
-    console.error("Civitai instance is not initialized.");
-    sendResponse({
-      status: "error",
-      message: "Civitai instance is not available.",
-    });
-    return;
-  }
+// const handleImageJob = async (
+//   request: any,
+//   sender: chrome.runtime.MessageSender,
+//   sendResponse: (response?: any) => void
+// ): Promise<void> => {
+//   if (!civitai) {
+//     console.error("Civitai instance is not initialized.");
+//     sendResponse({
+//       status: "error",
+//       message: "Civitai instance is not available.",
+//     });
+//     return;
+//   }
 
-  //   // Placeholder for handling image generation based on the request
-  //   // Example: Generate an image or process the request
-  //   // const image = civitai.someMethod(request.payload);
-  //   const response = await civitai.image.fromText(input);
-  //   console.log(response);
-  //   console.log("Processing prompt request:", request.payload);
+//   // Placeholder for handling image generation based on the request
+//   // Example: Generate an image or process the request
+//   // const image = civitai.someMethod(request.payload);
+//   const response = await civitai.image.fromText(input);
+//   console.log(response);
+//   console.log("Processing prompt request:", request.payload);
 
-  //   // Example response (modify according to actual logic)
-  //   sendResponse({ status: "success", message: "Request processed." });
-  // };
+//   // Example response (modify according to actual logic)
+//   sendResponse({ status: "success", message: "Request processed." });
+// };
 
-  const setApiKeyCookie = (apiKey: string): void => {
-    const date = new Date();
-    date.setDate(date.getDate() + 30);
-    const expires = `expires=${date.toUTCString()}`;
+const setApiKeyCookie = (apiKey: string): void => {
+  const date = new Date();
+  date.setDate(date.getDate() + 30);
 
-    chrome.cookies.set({
-      url: "https://developer.civitai.com",
-      name: "civitai_api_key",
-      value: apiKey,
-      expirationDate: date.getTime(),
-      // domain: ".civitai.com",
-    });
-
-    API_KEY = apiKey;
-
-    initCivitai();
-
-    sendResponse({ valid: true });
-  };
-
-  chrome.runtime.onMessage.addListener(
-    async (
-      request: any,
-      sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: any) => void
-    ) => {
-      try {
-        console.log(request);
-        switch (request.action) {
-          case "sendPrompt":
-            await handleImageJob(request, sender, sendResponse);
-            break;
-
-          case "set_api_key":
-            setApiKeyCookie(request.value);
-            break;
-
-          default:
-            console.log("Unknown action:", request.action);
-            sendResponse({ error: "Unknown action" });
-            break;
-        }
-      } catch (error) {
-        console.error(error);
-      }
-
-      return true;
-    }
-  );
-};
-
-chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
-  const civApiKey = await chrome.cookies.get({
-    name: "civitai_api_key",
-    url: "https://developer.civitai.com",
+  chrome.cookies.set({
+    url: "http://localhost",
+    name: "api_key",
+    value: apiKey,
+    expirationDate: date.getTime(),
   });
 
-  if (civApiKey) {
-    API_KEY = civApiKey.value;
-    initCivitai();
+  API_KEY = apiKey;
+
+  initCivitai();
+};
+
+chrome.runtime.onMessage.addListener(
+  async (
+    request: any,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    try {
+      console.log(request);
+      switch (request.action) {
+        // case "sendPrompt":
+        //   await handleImageJob(request, sender, sendResponse);
+        //   break;
+
+        case "set_api_key":
+          setApiKeyCookie(request.value);
+          sendResponse({ valid: true });
+
+          break;
+
+        default:
+          console.log("Unknown action:", request.action);
+          sendResponse({ error: "Unknown action" });
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    return true;
   }
+);
+
+chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
+  // const civApiKey = await chrome.cookies.get({
+  //   name: "api_key",
+  //   url: "http://localhost",
+  // });
+
+  // if (civApiKey) {
+  //   API_KEY = civApiKey.value;
+  //   initCivitai();
+  // }
 
   console.log("Background script installed.");
   console.log("Extension installed");
