@@ -6,14 +6,16 @@ import ViewAll from "./components/ViewAll";
 import { messageHandler } from "./messageHandler";
 import { ClientActions } from "./types";
 import { error } from "console";
+import { fetchApiKey } from "./serviceMananger"
 
 const App: React.FC = () => {
   const [activeComponent, setActiveComponent] = useState<string>("Form");
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
-  useEffect(() => {
+  useEffect(async () => {
     // Simulate checking for a valid API key
+    const storedApiKey = await fetchApiKey();
 
     // const storedApiKey =
     //   document.cookie
@@ -23,9 +25,10 @@ const App: React.FC = () => {
     //     ?.split("=")[1] || null;
 
     //TODO: Set up a function that when pop up is triggered ask for cookie from background script as this is where we store our cookies
-    if (!apiKey) {
-      setIsModalVisible(true);
+    if (!storedApiKey) {
+      setIsModalVisible(false);
     } else {
+      
     }
   }, []);
 
