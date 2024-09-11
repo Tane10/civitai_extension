@@ -5,7 +5,7 @@ const build = () => {
   try {
     esbuild
       .build({
-        entryPoints: ["src/index.tsx", "src/background.ts", "src/content.ts"],
+        entryPoints: ["src/**/*.tsx", "src/**/*.ts"],
         bundle: true,
         minify: true,
         sourcemap: true,

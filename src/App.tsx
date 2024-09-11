@@ -5,28 +5,24 @@ import Query from "./components/Query";
 import ViewAll from "./components/ViewAll";
 import { messageHandler } from "./messageHandler";
 import { ClientActions } from "./types";
-import { error } from "console";
+import { fetchApiKey } from "./serviceManager";
 
 const App: React.FC = () => {
   const [activeComponent, setActiveComponent] = useState<string>("Form");
   const [apiKey, setApiKey] = useState<string | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
 
   useEffect(() => {
-    // Simulate checking for a valid API key
+    const onFetchData = async () => {
+      const fetchApiKeyResp = await fetchApiKey();
 
-    // const storedApiKey =
-    //   document.cookie
-    //     .split(";")
-    //     .map((item) => item.trim())
-    //     .find((cookie) => cookie.startsWith(`api_key=`))
-    //     ?.split("=")[1] || null;
+      if (fetchApiKeyResp) {
+        setApiKey(fetchApiKeyResp);
+        setIsModalVisible(false);
+      }
+    };
 
-    //TODO: Set up a function that when pop up is triggered ask for cookie from background script as this is where we store our cookies
-    if (!apiKey) {
-      setIsModalVisible(true);
-    } else {
-    }
+    onFetchData();
   }, []);
 
   const handleSubmitApiKey = async (newApiKey: string) => {
@@ -41,7 +37,7 @@ const App: React.FC = () => {
 
       if (!apiKeyMsg.error) {
         setApiKey(newApiKey);
-        setIsModalVisible(false);
+        setIsModalVisible(true);
       }
       return;
     }

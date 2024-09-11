@@ -1,6 +1,6 @@
 //TODO: implement these actions in App.tsx
 
-const fetchApiKey = async (): Promise<string> => {
+export const fetchApiKey = async (): Promise<string> => {
   try {
     const cookie = await new Promise<chrome.cookies.Cookie | null>(
       (resolve, reject) => {
@@ -17,6 +17,7 @@ const fetchApiKey = async (): Promise<string> => {
       }
     );
 
+    console.log(`We have to Cookie: ${cookie?.value}`);
     return cookie ? cookie.value : ""; // Return the cookie value if found, otherwise empty string
   } catch (error) {
     console.error("Error fetching API key:", error);
@@ -24,7 +25,7 @@ const fetchApiKey = async (): Promise<string> => {
   }
 };
 
-const setApiKeyCookie = (apiKey: string): string => {
+export const setApiKeyCookie = (apiKey: string): string => {
   const date = new Date();
   date.setDate(date.getDate() + 30);
 

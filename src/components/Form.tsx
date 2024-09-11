@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Scheduler } from "civitai";
 
 const quantityOptions = [1, 2, 3, 4, 5]; // Adjust as needed
 
@@ -11,11 +12,11 @@ const Form: React.FC = () => {
   // const [nsfw, setNsfw] = useState(false);
   const [draftMode, setDraftMode] = useState(false);
   const [cfgScale, setCfgScale] = useState("balance");
-  const [sliderValue, setSliderValue] = useState(50);
-  const [sample, setSample] = useState("");
-  const [steps, setSteps] = useState(50);
+  const [sliderValue, setSliderValue] = useState(7.5);
+  const [sample, setSample] = useState<Scheduler | string>("EulerA");
+  const [steps, setSteps] = useState(25);
   const [seed, setSeed] = useState<number | undefined>(undefined);
-  const [clipSkip, setClipSkip] = useState(0);
+  const [clipSkip, setClipSkip] = useState(1);
   const [quantity, setQuantity] = useState<number>(1); // Default quantity
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -196,17 +197,31 @@ const Form: React.FC = () => {
           </button>
         </div>
 
-        <label className="block text-sm font-medium text-gray-700 mt-4">
-          CFG Scale
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={sliderValue}
-          onChange={(e) => setSliderValue(Number(e.target.value))}
-          className="mt-2 w-full"
-        />
+        <div className="cfgScale">
+          <label className="block text-sm font-medium text-gray-700 mt-4">
+            CFG Scale
+          </label>
+          <input
+            type="range"
+            min="10"
+            max="30"
+            value={sliderValue}
+            onChange={(e) => setSliderValue(Number(e.target.value))}
+            className="mt-2 w-full"
+            step="0.5"
+          />
+          <input
+            className="block w-24 border border-gray-300"
+            type="number" // Change type to number
+            max="30"
+            min="1"
+            step="0.5"
+            inputMode="decimal"
+            onChange={(e) => setSliderValue(Number(e.target.value))}
+            aria-invalid="false"
+            value={sliderValue}
+          />
+        </div>
 
         <label className="block text-sm font-medium text-gray-700 mt-4">
           Sampler
@@ -217,20 +232,38 @@ const Form: React.FC = () => {
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
         >
           <option value="">Select sampler</option>
-          {/* Add dropdown options here */}
+          {Object.values(Scheduler).map((scheduler) => (
+            <option key={scheduler} value={scheduler}>
+              {scheduler}
+            </option>
+          ))}
         </select>
 
-        <label className="block text-sm font-medium text-gray-700 mt-4">
-          Steps
-        </label>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={steps}
-          onChange={(e) => setSteps(Number(e.target.value))}
-          className="mt-2 w-full"
-        />
+        <div className="step">
+          <label className="block text-sm font-medium text-gray-700 mt-4">
+            Steps
+          </label>
+          <input
+            type="range"
+            min="10"
+            max="50"
+            step="1"
+            value={steps}
+            onChange={(e) => setSteps(Number(e.target.value))}
+            className="mt-2 w-full"
+          />
+          <input
+            className="block w-24 border border-gray-300"
+            type="number" // Change type to number
+            min="10"
+            max="50"
+            step="1"
+            inputMode="numeric"
+            onChange={(e) => setSteps(Number(e.target.value))}
+            aria-invalid="false"
+            value={steps}
+          />
+        </div>
 
         <label className="block text-sm font-medium text-gray-700 mt-4">
           Seed
@@ -251,17 +284,30 @@ const Form: React.FC = () => {
           />
         </div>
 
-        <label className="block text-sm font-medium text-gray-700 mt-4">
-          Clip Skip
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="10"
-          value={clipSkip}
-          onChange={(e) => setClipSkip(Number(e.target.value))}
-          className="mt-2 w-full"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mt-4">
+            Clip Skip
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="3"
+            value={clipSkip}
+            onChange={(e) => setClipSkip(Number(e.target.value))}
+            className="mt-2 w-full"
+          />
+          <input
+            className="block w-24 border border-gray-300"
+            type="number" // Change type to number
+            min="1"
+            max="3"
+            step="1"
+            inputMode="numeric"
+            onChange={(e) => setClipSkip(Number(e.target.value))}
+            aria-invalid="false"
+            value={clipSkip}
+          />
+        </div>
       </div>
 
       <div className="flex items-center space-x-4">

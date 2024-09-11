@@ -1,5 +1,4 @@
 import { ActionTypes, Message } from "./types";
-import { randomUUID } from "crypto";
 
 const buildMessage = ({
   action,
@@ -8,16 +7,14 @@ const buildMessage = ({
   action: ActionTypes;
   value: string | Record<any, any>;
 }): Message => {
-  const uuid = randomUUID();
-  const timestamp = new Date().getTime();
+  // const timestamp = new Date().getTime();
 
   return {
-    uuid,
     action,
     value,
     valid: true,
     error: null,
-    timestamp,
+    // timestamp,
   };
 };
 

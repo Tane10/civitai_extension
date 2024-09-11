@@ -1,8 +1,11 @@
+import { setApiKeyCookie } from "./serviceManager";
+import { Message, ActionTypes, BackgroundActions } from "./types";
+
 chrome.runtime.onMessage.addListener(
   async (
-    request: any,
+    request: Message,
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void
+    sendResponse: (response?: Message) => void
   ) => {
     try {
       console.log(request);
@@ -11,15 +14,30 @@ chrome.runtime.onMessage.addListener(
         //   await handleImageJob(request, sender, sendResponse);
         //   break;
 
-        case "set_api_key":
-          setApiKeyCookie(request.value);
-          sendResponse({ valid: true });
+        case "SET_API_KEY":
+          if (typeof request?.value == "string") {
+            setApiKeyCookie(request.value);
+
+            const respMessage: Message = {
+              action: BackgroundActions.SEND_API_KEY,
+              valid: true,
+              value: request.value,
+              error: null,
+            };
+
+            sendResponse(respMessage);
+          }
 
           break;
 
         default:
           console.log("Unknown action:", request.action);
-          sendResponse({ error: "Unknown action" });
+          sendResponse({
+            action: BackgroundActions.UNKNOWN_ACTION,
+            valid: false,
+            value: "NULL",
+            error: "Unknown action",
+          });
           break;
       }
     } catch (error) {

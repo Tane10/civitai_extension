@@ -12,3 +12,7 @@ prompt templates
 TODO: |
 add libary page to hold save templates etc
 this page can interact with civitai promt fields
+
+IMPORTANT => https://github.com/civitai/civitai/wiki/REST-API-Reference
+This is where we will get all the info me need for models etc
+and we can use the response and create a model to generate the images
