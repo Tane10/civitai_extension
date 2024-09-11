@@ -151,3 +151,117 @@ chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
   console.log("Background script installed.");
   console.log("Extension installed");
 });
+
+//  * "urn:air:{base model i.e. SD1 or SDXL}:checkpoint:civitai:{id}@{moodel version}"
+function formateCheckpoint({
+  rawBaseModel,
+  modelId,
+  versionId,
+}: {
+  rawBaseModel: string;
+  modelId: number;
+  versionId: number;
+}) {
+  let baseModel = "";
+
+  if (/SD 1[\*]?|SD 1/i.test(rawBaseModel)) {
+    baseModel = "sd1";
+  } else if (/sdxl/i.test(rawBaseModel)) {
+    baseModel = "sdxl";
+  } else if (/flux/i.test(rawBaseModel)) {
+    baseModel = "flux";
+  } else if (/Pony/i.test(rawBaseModel)) {
+    baseModel = "sd1";
+  } else {
+    console.error("unknown model");
+    return "";
+  }
+
+  // model: "urn:air:sd1:checkpoint:civitai:4384@128713",
+
+  return `urn:air:${baseModel}:checkpoint:civitai:${modelId}@${versionId}`;
+}
+
+/**
+ * Converts an object to URL-encoded query parameters.
+ *
+ * @param params - The object to convert to query parameters.
+ * @returns The URL-encoded query string.
+ */
+const objectToQueryString = (params: Record<string, any>): string => {
+  const queryString = Object.keys(params)
+    .map((key) => {
+      const value = params[key];
+
+      // If the value is an array, map each item to a key=value format
+      if (Array.isArray(value)) {
+        return value
+          .map(
+            (item) => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`
+          )
+          .join("&");
+      }
+
+      // For other types, directly encode the key and value
+      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+    })
+    .join("&");
+
+  return queryString;
+};
+
+// Example usage:
+
+(async () => {
+  const queryParmsObj = {
+    limit: 10,
+    page: 1,
+    sort: "Highest Rated",
+    types: ["Checkpoint"],
+  };
+
+  const baseURL = "https://civitai.com/api/v1/";
+  const queryParms = objectToQueryString(queryParmsObj);
+
+  const url = `${baseURL}models?${queryParms}`;
+
+  const modelsReq = await fetch(url, {
+    headers: new Headers([["Content-Type", "application/json"]]),
+    method: "GET",
+  });
+
+  const resp = await modelsReq.json();
+
+  // console.log(resp.items);
+  // console.log(resp.items[0].modelVersions[0]);
+
+  // sd1
+  // sdxl
+  // flux
+
+  const items = resp.items.map(
+    (item: {
+      id: any;
+      name: any;
+      nsfw: any;
+      modelVersions: {
+        baseModel: any;
+        id: any;
+      }[];
+    }) => {
+      return {
+        modelId: item.id,
+        name: item.name,
+        nsfw: item.nsfw,
+        latesModelVersion: item.modelVersions[0].id,
+        modelUrn: formateCheckpoint({
+          rawBaseModel: item.modelVersions[0].baseModel,
+          modelId: item.id,
+          versionId: item.modelVersions[0].id,
+        }),
+      };
+    }
+  );
+
+  console.log(items);
+})();
