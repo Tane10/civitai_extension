@@ -1,5 +1,7 @@
-import React from 'react';
-import Card from './Card'; // Adjust the import path based on your project structure
+import React from "react";
+import Card from "./Card"; // Adjust the import path based on your project structure
+
+//TODO: NEED to add checks for jobs running/ done
 
 interface QueryProps {
   cards: {

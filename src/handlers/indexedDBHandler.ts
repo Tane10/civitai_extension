@@ -1,5 +1,5 @@
-import Dexie, { DbSchema, Table } from "dexie";
-import { CivitaiCheckpointsModelData, DBModel } from "../types";
+import Dexie, { Table } from "dexie";
+import { CivitaiCheckpointsModelData } from "../types";
 
 export class IndexedDbHandler extends Dexie {
   private static instance: IndexedDbHandler;

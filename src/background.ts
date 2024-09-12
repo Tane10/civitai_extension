@@ -1,6 +1,10 @@
-import { setApiKeyCookie } from "./handlers/backgroundScriptHandler";
+import {
+  fetchApiKey,
+  setApiKeyCookie,
+} from "./handlers/backgroundScriptHandler";
 import { Message, ActionTypes, BackgroundActions } from "./types";
-import { initSetCivitaiModels } from "./handlers/civitaiHandler";
+import { handleImageJob, initCivitai } from "./handlers/civitaiHandler";
+import { FromTextInput } from "civitai/dist/types/Inputs";
 
 // const db = IndexedDbHandler.getInstance();
 
@@ -29,10 +33,21 @@ chrome.runtime.onMessage.addListener(
 
           break;
 
+        // TODO: NOTE can send images via the background script, cant set up webhook as we need a client
+
         case "SEND_PROMPT":
           if (typeof request?.value == "object") {
-            console.log("generating images");
-            //   await handleImageJob(request, sender, sendResponse);
+            const imageJobResp = await handleImageJob(
+              request.value as FromTextInput
+            );
+
+            const respMessage: Message = {
+              action: BackgroundActions.GENERATION_RESULTS,
+              valid: true,
+              value: JSON.stringify(imageJobResp),
+              error: null,
+            };
+            sendResponse(respMessage);
           }
           break;
 
@@ -59,23 +74,19 @@ chrome.runtime.onMessage.addListener(
 );
 
 chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
-  // const civApiKey = await chrome.cookies.get({
-  //   name: "api_key",
-  //   url: "http://localhost",
-  // });
+  const API_KEY = await fetchApiKey();
 
-  // if (civApiKey) {
-  //   API_KEY = civApiKey.value;
-  //   initCivitai();
-  // }
+  if (API_KEY) {
+    initCivitai(API_KEY);
+  }
 
   console.log("Populating DB....");
 
-  const records = await initSetCivitaiModels();
+  // const records = await initSetCivitaiModels();
 
-  if (records != 0) {
-    console.log(`${records}: number of records have been added to indexedDB`);
-  }
+  // if (records != 0) {
+  //   console.log(`${records}: number of records have been added to indexedDB`);
+  // }
 
   console.log("Background script installed.");
   console.log("Extension installed");

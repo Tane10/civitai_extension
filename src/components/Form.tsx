@@ -1,19 +1,29 @@
 import React, { useState } from "react";
 import { Scheduler } from "civitai";
+import { ActionTypes, ClientActions } from "../types";
+import { messageHandler } from "../handlers/messageHandler";
 
 const quantityOptions = [1, 2, 3, 4, 5]; // Adjust as needed
+const size: Record<string, Record<string, number>> = {
+  square: { width: 512, height: 512 },
+  landscape: { width: 768, height: 512 },
+  portrait: { width: 512, height: 768 },
+};
+interface Props {
+  checkpoints: Array<any> | null;
+}
 
-const Form: React.FC = () => {
+const Form: React.FC<Props> = (props: Props) => {
   const [model, setModel] = useState("");
   const [resources, setResources] = useState("");
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("square");
-  // const [nsfw, setNsfw] = useState(false);
+  const [nsfw, setNsfw] = useState(false);
   const [draftMode, setDraftMode] = useState(false);
   const [cfgScale, setCfgScale] = useState("balance");
-  const [sliderValue, setSliderValue] = useState(7.5);
-  const [sample, setSample] = useState<Scheduler | string>("EulerA");
+  const [cfgScaleValue, setSliderValue] = useState(7.5);
+  const [scheduler, setScheduler] = useState<Scheduler | string>("EulerA");
   const [steps, setSteps] = useState(25);
   const [seed, setSeed] = useState<number | undefined>(undefined);
   const [clipSkip, setClipSkip] = useState(1);
@@ -22,24 +32,30 @@ const Form: React.FC = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Handle form submission
-    // console.log({ model, resources, prompt, negativePrompt, aspectRatio, nsfw, draftMode, cfgScale, sliderValue, sample, steps, seed, clipSkip });
-    console.log({
-      model,
-      resources,
-      prompt,
-      negativePrompt,
-      aspectRatio,
-      draftMode,
-      cfgScale,
-      sliderValue,
-      sample,
-      steps,
-      seed,
-      clipSkip,
+
+    const txt2ImgMessage = messageHandler({
+      action: ClientActions.SEND_PROMPT,
+      value: {
+        model,
+        params: {
+          // resources,
+          prompt,
+          negativePrompt,
+          width: size[aspectRatio].width,
+          height: size[aspectRatio].height,
+          // draftMode,
+          cfgScale: cfgScaleValue,
+          scheduler,
+          steps,
+          // seed,
+          clipSkip,
+        },
+      },
     });
   };
 
   const handleReset = () => {
+    //TODO: reset everything
     setQuantity(1);
     setPrompt("");
     setNegativePrompt("");
@@ -56,7 +72,11 @@ const Form: React.FC = () => {
         >
           <option value="">Select model</option>
 
-          {/* Add dropdown options here */}
+          {props.checkpoints?.map((checkpoint) => (
+            <option key={checkpoint.id} value={checkpoint.modelUrn}>
+              {checkpoint.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -112,7 +132,7 @@ const Form: React.FC = () => {
                 : "bg-white text-black"
             }`}
           >
-            Square
+            Square 512x512
           </button>
           <button
             type="button"
@@ -123,7 +143,7 @@ const Form: React.FC = () => {
                 : "bg-white text-black"
             }`}
           >
-            Landscape
+            Landscape 768x512
           </button>
           <button
             type="button"
@@ -134,17 +154,22 @@ const Form: React.FC = () => {
                 : "bg-white text-black"
             }`}
           >
-            Portrait
+            Portrait 512x768
           </button>
         </div>
       </div>
 
-      {/* <div>
+      <div>
         <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={nsfw} onChange={() => setNsfw(!nsfw)} className="h-4 w-4" />
+          <input
+            type="checkbox"
+            checked={nsfw}
+            onChange={() => setNsfw(!nsfw)}
+            className="h-4 w-4"
+          />
           <span>NSFW</span>
         </label>
-      </div> */}
+      </div>
 
       <div>
         <label className="flex items-center space-x-2">
@@ -165,7 +190,10 @@ const Form: React.FC = () => {
         <div className="flex space-x-2">
           <button
             type="button"
-            onClick={() => setCfgScale("creative")}
+            onClick={() => {
+              setCfgScale("creative");
+              setSliderValue(4);
+            }}
             className={`px-4 py-2 border rounded-md ${
               cfgScale === "creative"
                 ? "bg-blue-500 text-white"
@@ -176,7 +204,10 @@ const Form: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setCfgScale("balance")}
+            onClick={() => {
+              setCfgScale("balance");
+              setSliderValue(7);
+            }}
             className={`px-4 py-2 border rounded-md ${
               cfgScale === "balance"
                 ? "bg-blue-500 text-white"
@@ -187,7 +218,10 @@ const Form: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setCfgScale("precise")}
+            onClick={() => {
+              setCfgScale("precise");
+              setSliderValue(10);
+            }}
             className={`px-4 py-2 border rounded-md ${
               cfgScale === "precise"
                 ? "bg-blue-500 text-white"
@@ -206,7 +240,7 @@ const Form: React.FC = () => {
             type="range"
             min="10"
             max="30"
-            value={sliderValue}
+            value={cfgScaleValue}
             onChange={(e) => setSliderValue(Number(e.target.value))}
             className="mt-2 w-full"
             step="0.5"
@@ -220,7 +254,7 @@ const Form: React.FC = () => {
             inputMode="decimal"
             onChange={(e) => setSliderValue(Number(e.target.value))}
             aria-invalid="false"
-            value={sliderValue}
+            value={cfgScaleValue}
           />
         </div>
 
@@ -228,8 +262,8 @@ const Form: React.FC = () => {
           Sampler
         </label>
         <select
-          value={sample}
-          onChange={(e) => setSample(e.target.value)}
+          value={scheduler}
+          onChange={(e) => setScheduler(e.target.value)}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
         >
           <option value="">Select sampler</option>

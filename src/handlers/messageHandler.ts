@@ -1,4 +1,4 @@
-import { ActionTypes, Message } from "./types";
+import { ActionTypes, Message } from "../types";
 
 const buildMessage = ({
   action,

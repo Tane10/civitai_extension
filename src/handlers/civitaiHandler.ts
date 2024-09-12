@@ -1,15 +1,40 @@
-import { Civitai, Scheduler } from "civitai";
+import {
+  Civitai,
+  JobStatusCollection,
+  ProblemDetails,
+  Scheduler,
+} from "civitai";
 
-import { CivitaiCheckpointsModelData, ModelType, SortOrder } from "../types";
+import {
+  CivitaiCheckpointsModelData,
+  Message,
+  ModelType,
+  SortOrder,
+} from "../types";
 import { IndexedDbHandler } from "./indexedDBHandler";
+import { FromTextInput } from "civitai/dist/types/Inputs";
 
 // NOTE: Actions related to the civitAI script
 
 let civitai: Civitai | undefined;
-let API_KEY: string | undefined;
+
 const baseURL = "https://civitai.com/api/v1/";
 
 const db = IndexedDbHandler.getInstance();
+
+// {
+//   "model": "urn:air:sd1:checkpoint:civitai:7240@119057",
+//   "resources": "",
+//   "prompt": "this is a test",
+//   "negativePrompt": "",
+//   "aspectRatio": "landscape",
+//   "draftMode": false,
+//   "cfgScale": "balance",
+//   "sliderValue": 19.5,
+//   "sample": "DPM2A",
+//   "steps": 35,
+//   "clipSkip": 2
+// }
 
 // Example for txt2img input
 // const input = {
@@ -28,47 +53,43 @@ const db = IndexedDbHandler.getInstance();
 //   },
 // };
 
-const initCivitai = (): void => {
-  // const API_KEY = process.env.API_KEY; -> this don't work and cause background to fail.
-  // maybe use cookies instead
-
-  if (!API_KEY) {
+export const initCivitai = (apiKey: string): void => {
+  if (!apiKey) {
     console.error("API_KEY not found in environment variables.");
     return; // Exit early if no API key is present
   }
 
   try {
-    civitai = new Civitai({ auth: API_KEY });
+    civitai = new Civitai({ auth: apiKey });
     console.log("Civitai initialized successfully.");
   } catch (err) {
     console.error("Failed to initialize Civitai:", err);
   }
 };
 
-// const handleImageJob = async (
-//   request: any,
-//   sender: chrome.runtime.MessageSender,
-//   sendResponse: (response?: any) => void
-// ): Promise<void> => {
-//   if (!civitai) {
-//     console.error("Civitai instance is not initialized.");
-//     sendResponse({
-//       status: "error",
-//       message: "Civitai instance is not available.",
-//     });
-//     return;
-//   }
+export const handleImageJob = async (
+  request: FromTextInput
+  // sender: chrome.runtime.MessageSender,
+  // sendResponse: (response?: any) => void
+): Promise<JobStatusCollection | ProblemDetails | any> => {
+  if (!civitai) {
+    console.error("Civitai instance is not initialized.");
+    throw new Error(
+      JSON.stringify({
+        status: "error",
+        message: "Civitai instance is not available.",
+      })
+    );
+  }
 
-//   // Placeholder for handling image generation based on the request
-//   // Example: Generate an image or process the request
-//   // const image = civitai.someMethod(request.payload);
-//   const response = await civitai.image.fromText(input);
-//   console.log(response);
-//   console.log("Processing prompt request:", request.payload);
+  const response = await civitai.image.fromText(request);
+  console.log(response);
+  console.log("Processing prompt request:", response);
+  return response;
 
-//   // Example response (modify according to actual logic)
-//   sendResponse({ status: "success", message: "Request processed." });
-// };
+  // Example response (modify according to actual logic)
+  // sendResponse({ status: "success", message: "Request processed." });
+};
 
 function formateCheckpoint({
   rawBaseModel,
@@ -235,23 +256,28 @@ export const fetchModelData = async ({
   return items;
 };
 
-export const initSetCivitaiModels = async (): Promise<number> => {
-  let recordCount = 0;
-  const defaultQueryPrams = {
-    limit: 20,
-    page: 1,
-    sort: SortOrder.HighestRated,
-    types: [ModelType.Checkpoint],
-  };
-  const fetchedModels: Array<CivitaiCheckpointsModelData> =
-    await fetchModelData(defaultQueryPrams);
+// TODO: FIX ME v stop this from writing data every time the pop up is open
+// export const initSetCivitaiModels = async (): Promise<number> => {
+//   let recordCount = 0;
+//   const defaultQueryPrams = {
+//     limit: 20,
+//     page: 1,
+//     sort: SortOrder.HighestRated,
+//     types: [ModelType.Checkpoint],
+//   };
+//   const fetchedModels: Array<CivitaiCheckpointsModelData> =
+//     await fetchModelData(defaultQueryPrams);
 
-  try {
-    if (fetchModelData.length != 0) {
-      recordCount = await db.checkpoints.bulkAdd(fetchedModels);
-    }
-  } catch (err: any) {
-    throw new Error(err);
-  }
-  return recordCount;
+//   try {
+//     if (fetchModelData.length != 0) {
+//       recordCount = await db.checkpoints.bulkAdd(fetchedModels);
+//     }
+//   } catch (err: any) {
+//     throw new Error(err);
+//   }
+//   return recordCount;
+// };
+
+export const fetchAllCheckpoints = () => {
+  const checkpoints = db.table("checkpoints").toArray();
 };

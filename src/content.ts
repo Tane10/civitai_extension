@@ -52,3 +52,6 @@
 // });
 
 console.log("Content script loaded.");
+
+//TODO: use the content script to find the & update the data in the feed and querys tab
+// https://civitai.com/generate

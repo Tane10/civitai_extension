@@ -6,10 +6,14 @@ import ViewAll from "./components/ViewAll";
 import { messageHandler } from "./handlers/messageHandler";
 import { ClientActions } from "./types";
 import { fetchApiKey } from "./handlers/backgroundScriptHandler";
+import { IndexedDbHandler } from "./handlers/indexedDBHandler";
 
 const App: React.FC = () => {
+  const db = IndexedDbHandler.getInstance();
+
   const [activeComponent, setActiveComponent] = useState<string>("Form");
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [checkpoints, setCheckpoints] = useState<Array<any> | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
 
   useEffect(() => {
@@ -20,6 +24,13 @@ const App: React.FC = () => {
         setApiKey(fetchApiKeyResp);
         setIsModalVisible(false);
       }
+
+      // setCheckpoints(db.table("checkpoints").toArray();)
+
+      // TODO: FIX ME v
+      const fetchedCheckpoints = await db.table("checkpoints").toArray();
+
+      setCheckpoints(fetchedCheckpoints);
     };
 
     onFetchData();
@@ -82,7 +93,7 @@ const App: React.FC = () => {
   const renderComponent = () => {
     switch (activeComponent) {
       case "Form":
-        return <Form />;
+        return <Form checkpoints={checkpoints} />;
       case "Query":
         return <Query cards={cardsData} />;
       case "ViewAll":
