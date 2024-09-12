@@ -1,5 +1,7 @@
 //TODO: implement these actions in App.tsx
 
+// NOTE: Action related to the background script
+
 export const fetchApiKey = async (): Promise<string> => {
   try {
     const cookie = await new Promise<chrome.cookies.Cookie | null>(

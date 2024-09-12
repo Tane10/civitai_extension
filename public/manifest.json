@@ -20,7 +20,7 @@
       "js": ["content.js"]
     }
   ],
-  "host_permissions": ["*://localhost/*"],
+  "host_permissions": ["*://localhost/*", "https://civitai.com/*"],
   "background": {
     "service_worker": "background.js"
   },

@@ -3,9 +3,9 @@ import Form from "./components/Form";
 import Modal from "./components/Modal";
 import Query from "./components/Query";
 import ViewAll from "./components/ViewAll";
-import { messageHandler } from "./messageHandler";
+import { messageHandler } from "./handlers/messageHandler";
 import { ClientActions } from "./types";
-import { fetchApiKey } from "./serviceManager";
+import { fetchApiKey } from "./handlers/backgroundScriptHandler";
 
 const App: React.FC = () => {
   const [activeComponent, setActiveComponent] = useState<string>("Form");

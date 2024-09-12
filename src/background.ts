@@ -1,5 +1,8 @@
-import { setApiKeyCookie } from "./serviceManager";
+import { setApiKeyCookie } from "./handlers/backgroundScriptHandler";
 import { Message, ActionTypes, BackgroundActions } from "./types";
+import { initSetCivitaiModels } from "./handlers/civitaiHandler";
+
+// const db = IndexedDbHandler.getInstance();
 
 chrome.runtime.onMessage.addListener(
   async (
@@ -10,10 +13,6 @@ chrome.runtime.onMessage.addListener(
     try {
       console.log(request);
       switch (request.action) {
-        // case "sendPrompt":
-        //   await handleImageJob(request, sender, sendResponse);
-        //   break;
-
         case "SET_API_KEY":
           if (typeof request?.value == "string") {
             setApiKeyCookie(request.value);
@@ -28,6 +27,17 @@ chrome.runtime.onMessage.addListener(
             sendResponse(respMessage);
           }
 
+          break;
+
+        case "SEND_PROMPT":
+          if (typeof request?.value == "object") {
+            console.log("generating images");
+            //   await handleImageJob(request, sender, sendResponse);
+          }
+          break;
+
+        case "FETCH_MODELS":
+          console.log("returning models");
           break;
 
         default:
@@ -58,6 +68,14 @@ chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
   //   API_KEY = civApiKey.value;
   //   initCivitai();
   // }
+
+  console.log("Populating DB....");
+
+  const records = await initSetCivitaiModels();
+
+  if (records != 0) {
+    console.log(`${records}: number of records have been added to indexedDB`);
+  }
 
   console.log("Background script installed.");
   console.log("Extension installed");
