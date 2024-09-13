@@ -20,6 +20,8 @@ const App: React.FC = () => {
     const onFetchData = async () => {
       const fetchApiKeyResp = await fetchApiKey();
 
+      console.log(`api KEY: ${fetchApiKeyResp}`);
+
       if (fetchApiKeyResp) {
         setApiKey(fetchApiKeyResp);
         setIsModalVisible(false);

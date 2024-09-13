@@ -1,5 +1,7 @@
 import {
   Civitai,
+  Job,
+  JobStatus,
   JobStatusCollection,
   ProblemDetails,
   Scheduler,
@@ -13,6 +15,7 @@ import {
 } from "../types";
 import { IndexedDbHandler } from "./indexedDBHandler";
 import { FromTextInput } from "civitai/dist/types/Inputs";
+import { error } from "console";
 
 // NOTE: Actions related to the civitAI script
 
@@ -83,6 +86,12 @@ export const handleImageJob = async (
   }
 
   const response = await civitai.image.fromText(request);
+
+  // TODO: FIX ME, DB doesn't have jobs as a seperate field dunno why
+  if (response.token && response.jobs) {
+    await db.jobs.add({ token: response.token, jobs: response.jobs });
+  }
+
   console.log(response);
   console.log("Processing prompt request:", response);
   return response;
@@ -256,28 +265,49 @@ export const fetchModelData = async ({
   return items;
 };
 
-// TODO: FIX ME v stop this from writing data every time the pop up is open
-// export const initSetCivitaiModels = async (): Promise<number> => {
-//   let recordCount = 0;
-//   const defaultQueryPrams = {
-//     limit: 20,
-//     page: 1,
-//     sort: SortOrder.HighestRated,
-//     types: [ModelType.Checkpoint],
-//   };
-//   const fetchedModels: Array<CivitaiCheckpointsModelData> =
-//     await fetchModelData(defaultQueryPrams);
+export const initSetCivitaiModels = async (): Promise<number> => {
+  let recordCount = 0;
+  const defaultQueryPrams = {
+    limit: 20,
+    page: 1,
+    sort: SortOrder.HighestRated,
+    types: [ModelType.Checkpoint],
+  };
+  const fetchedModels: Array<CivitaiCheckpointsModelData> =
+    await fetchModelData(defaultQueryPrams);
 
-//   try {
-//     if (fetchModelData.length != 0) {
-//       recordCount = await db.checkpoints.bulkAdd(fetchedModels);
-//     }
-//   } catch (err: any) {
-//     throw new Error(err);
-//   }
-//   return recordCount;
-// };
+  try {
+    if (fetchModelData.length != 0) {
+      recordCount = await db.checkpoints.bulkAdd(fetchedModels);
+    }
+  } catch (err: any) {
+    if (err.name == "BulkError") {
+      console.error(err);
+    } else {
+      throw new Error(err);
+    }
+  }
+  return recordCount;
+};
 
 export const fetchAllCheckpoints = () => {
   const checkpoints = db.table("checkpoints").toArray();
+};
+
+export const updateJobs = async () => {
+  const jobs = await db.table("jobs").toArray();
+
+  for (const job of jobs) {
+    job["jobs"].map(async (x: JobStatus) => {
+      if (!x.result.available) {
+        if (x.jobId) {
+          const checkedJob = await civitai?.jobs.getById(x.jobId);
+
+          if (checkedJob?.result) {
+            console.log(checkedJob.result);
+          }
+        }
+      }
+    });
+  }
 };

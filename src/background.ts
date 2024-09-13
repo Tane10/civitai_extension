@@ -3,7 +3,12 @@ import {
   setApiKeyCookie,
 } from "./handlers/backgroundScriptHandler";
 import { Message, ActionTypes, BackgroundActions } from "./types";
-import { handleImageJob, initCivitai } from "./handlers/civitaiHandler";
+import {
+  handleImageJob,
+  initCivitai,
+  initSetCivitaiModels,
+  updateJobs,
+} from "./handlers/civitaiHandler";
 import { FromTextInput } from "civitai/dist/types/Inputs";
 
 // const db = IndexedDbHandler.getInstance();
@@ -82,12 +87,19 @@ chrome.runtime.onInstalled.addListener(async (): Promise<void> => {
 
   console.log("Populating DB....");
 
-  // const records = await initSetCivitaiModels();
+  //TODO: add page so we can use this to fetch the different models instead of just of handling error
+  const records = await initSetCivitaiModels();
 
-  // if (records != 0) {
-  //   console.log(`${records}: number of records have been added to indexedDB`);
-  // }
+  if (records != 0) {
+    console.log(`${records}: number of records have been added to indexedDB`);
+  }
 
   console.log("Background script installed.");
   console.log("Extension installed");
 });
+
+//TODO: work out a better way to handler polling
+// (() =>
+//   setInterval(async () => {
+//     await updateJobs();
+//   }, 2000))();

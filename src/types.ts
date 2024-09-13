@@ -196,3 +196,11 @@ export interface CivitaiCheckpointsModelData extends DBModel {
   latesModelVersion: number;
   modelUrn: string;
 }
+
+export interface CivitaiJobsData extends DBModel {
+  jobId: number;
+  promt: string;
+  nsfw: boolean;
+  latesModelVersion: number;
+  modelUrn: string;
+}
