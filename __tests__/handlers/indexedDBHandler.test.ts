@@ -1,1 +1,1 @@
-describe('IndexedDB Handler Test Suit',()=>{})
+describe.skip("IndexedDB Handler Test Suit", () => {});

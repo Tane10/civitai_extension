@@ -1,1 +1,1 @@
-describe('Background / Service Worker Test Suit',()=>{})
+describe.skip("Background / Service Worker Test Suit", () => {});

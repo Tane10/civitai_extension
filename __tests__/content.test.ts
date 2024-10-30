@@ -1,1 +1,1 @@
-describe('Content Script Test Suit',()=>{})
+describe.skip("Content Script Test Suit", () => {});

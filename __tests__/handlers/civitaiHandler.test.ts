@@ -1,1 +1,1 @@
-describe('Civitai Handler Test Suit',()=>{})
+describe.skip("Civitai Handler Test Suit", () => {});

@@ -9,7 +9,7 @@
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
-      "types": ["chrome", "node"]
+      "types": ["chrome", "node", "jest"]
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules"]

@@ -27,13 +27,13 @@ export const fetchApiKey = async (): Promise<string> => {
   }
 };
 
-export const setApiKeyCookie = (apiKey: string): string => {
+export const setApiKeyCookie = (apiKey: string, name: string): string => {
   const date = new Date();
   date.setDate(date.getDate() + 30);
 
   chrome.cookies.set({
     url: "http://localhost",
-    name: "api_key",
+    name,
     value: apiKey,
     expirationDate: date.getTime(),
   });
